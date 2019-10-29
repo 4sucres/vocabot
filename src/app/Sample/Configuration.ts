@@ -3,4 +3,5 @@ export interface Configuration {
   url: string;
   download: string;
   listen: string;
+  data: string;
 }

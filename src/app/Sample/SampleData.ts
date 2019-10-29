@@ -39,20 +39,4 @@ export interface SampleData {
    * @memberof SampleData
    */
   listenUrl: string;
-
-  /**
-   * Downloaded file name.
-   *
-   * @type {string}
-   * @memberof SampleData
-   */
-  filename?: string;
-
-  /**
-   * Local full path.
-   *
-   * @type {string}
-   * @memberof SampleData
-   */
-  path?: string;
 }

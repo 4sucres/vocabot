@@ -1,4 +1,4 @@
-import { Argument, Command, PrefixFunction, Category, CommandHandler } from "discord-akairo";
+import { Argument, Command, PrefixFunction, Category } from "discord-akairo";
 import StringBuilder, { PrefixType } from "./stringBuilder";
 import { surrounded, space } from "./string";
 import { RichEmbed } from "discord.js";

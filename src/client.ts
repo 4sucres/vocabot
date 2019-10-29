@@ -1,5 +1,5 @@
 import { AkairoClient, CommandHandler } from "discord-akairo";
-import config from './config/config.json';
+import config from '@config';
 import path from 'path';
 
 class Vocabot extends AkairoClient
@@ -12,6 +12,7 @@ class Vocabot extends AkairoClient
             commandUtilLifetime: 120 * 100,
             commandDirectory: path.resolve(__dirname, 'commands'),
             listenerDirectory: path.resolve(__dirname, 'listeners'),
+            inhibitorDirectory: path.resolve(__dirname, 'inhibitors'),
         }, {
             disableEveryone: true
         });

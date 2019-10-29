@@ -1,5 +1,5 @@
 import { Listener } from 'discord-akairo';
-import logger from '../../logger';
+import logger from '@logger';
 
 module.exports = class BlockListener extends Listener
 {
