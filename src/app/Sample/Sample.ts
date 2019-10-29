@@ -159,4 +159,36 @@ export class Sample {
       });
     });
   }
+
+  /**
+   * Deletes the sample on the disk.
+   *
+   * @returns
+   * @memberof Sample
+   */
+  public async delete() {
+    if (!this._data) {
+      return new Promise((a, r) => r(`Invalid sample.`));
+    }
+
+    if (!this._data.path) {
+      return new Promise((a, r) => r(`Sample wasn't downloaded.`));
+    }
+
+    if (!fs.existsSync(this._data.path)) {
+      return new Promise((a, r) => r(`Sample is already deleted.`));
+    }
+
+    try {
+      fs.access(this._data.path, error => {
+        if (!error) {
+            fs.unlinkSync(<string>(<SampleData>this._data).path);
+        } else {
+          vocabot.error(`An access to a sample could not be granted.`, this);
+        }
+    });
+    } catch (error) {
+      vocabot.error(`A sample could not be deleted.`, this);
+    }
+  }
 }

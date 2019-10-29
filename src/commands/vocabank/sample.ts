@@ -43,6 +43,7 @@ export default class SampleCommand extends Command {
           .then(async (data: SampleData) => {
             message.channel.send('', new Attachment(<string>data.path, 'Vocabank.mp3')).then(() => {
               (<Message>waiting).delete();
+              sample.delete();
             });
           })
           .catch(() => {
