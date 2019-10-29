@@ -8,7 +8,7 @@ import Category from '@app/Category';
 import v from 'voca';
 import moment from 'moment';
 
-const KEY = '<uuid>';
+export const KEY = '<uuid>';
 
 export default class SampleCommand extends Command {
   constructor() {
@@ -82,7 +82,7 @@ export default class SampleCommand extends Command {
 
       // No error, upload the sample
       try {
-        let text = `*${result.metadata.name}*`;
+        let text = (result.metadata.name ? `\`${result.metadata.name}\` • ` : '') + `<${result.data.url}>`;
         const attachment: Attachment = new Attachment(result.local.path, `${v.slugify(result.metadata.name) || 'sample'}.mp3` || result.local.filename);
 
         if (args.metadata && result.metadata.found) {
