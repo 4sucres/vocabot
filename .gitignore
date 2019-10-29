@@ -1,0 +1,7 @@
+lib
+dist
+node_modules
+src/config/config.json
+logs.txt
+samples/
+**/*.mp3
