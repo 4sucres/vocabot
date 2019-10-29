@@ -1,194 +1,202 @@
-import fs from 'fs';
 import path from 'path';
 import Axios from 'axios';
 import root from 'app-root-path';
-import vocabot from '../../logger';
+import v from 'voca';
 import { SampleData } from './SampleData';
 import { Configuration } from './Configuration';
 import { Url } from './Url';
+import { SampleMetadata } from './SampleMetadata';
+import { SampleLocalData } from './SampleLocalData';
+import { sample as config } from '@config';
+import { env } from '@config';
+import { Storage } from './Storage';
+import { vocabot as logger } from '@logger';
+import https from 'https';
+import moment from 'moment';
 
 export class Sample {
   private _input: string;
-  private _data?: SampleData;
-  private _urlRegex: RegExp;
-  private _uuidRegex: RegExp;
-  private _config: Configuration;
+  private _data: SampleData;
+  private _metadata: SampleMetadata;
+  private _local: SampleLocalData;
 
-  constructor(input: string, config: Configuration) {
+  constructor(input: string, data: SampleData, meta: SampleMetadata, local: SampleLocalData) {
     this._input = input.toString();
-    this._config = config;
-    this._urlRegex = /^(https:\/\/)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})(?:\/samples\/)([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$/;
-    this._uuidRegex = /^([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$/;
-    this._data = this.parse();
-  }
-
-  /**
-   * Gets data about the sample.
-   *
-   * @readonly
-   * @type {SampleData}
-   * @memberof Sample
-   */
-  public get data(): SampleData | undefined {
-    return this._data;
-  }
-
-  /**
-   * Parses an URL or UUID and returns its data.
-   */
-  private parse(): SampleData | undefined {
-    const data = this.parseUuid() || this.parseUrl();
-
-    if (data) {
-      return data;
-    }
-
-    vocabot.debug(`Could not parse an URL nor an UUID: ${this._input}`);
-  }
-
-  /**
-   * Parses an UUID.
-   *
-   * @private
-   * @returns {(SampleData | undefined)}
-   * @memberof Sample
-   */
-  private parseUuid(): SampleData | undefined {
-    const matches = this._input.match(this._uuidRegex);
-    console.log(matches);
-
-    if (matches && 2 === matches.length) {
-      return Sample.data(this._config.domain, matches[1], this._config);
-    }
-  }
-
-  /**
-   * Parses an URL.
-   *
-   * @private
-   * @returns {(SampleData | undefined)}
-   * @memberof Sample
-   */
-  private parseUrl(): SampleData | undefined {
-    const matches = this._input.match(this._urlRegex);
-
-    if (matches && 5 === matches.length && this._config.domain === matches[2]) {
-      return Sample.data(this._config.domain, matches[4], this._config);
-    }
+    this._data = data;
+    this._metadata = meta;
+    this._local = local;
   }
 
   /**
    * Gets an URL with the given UUID.
    */
-  public getUrl(uuid: string, type: Url): string {
-    return Sample.url(uuid, type, this._config);
+  public static url(uuid: string, type: Url, options?: Configuration): string {
+    return config[type].replace('{domain}', { ...config, ...options }.domain).replace('{uuid}', uuid);
   }
 
   /**
-   * Gets an URL with the given UUID.
+   * Generates a sample from an UUID.
+   *
+   * @static
+   * @param {string} uuid
+   * @param {string} [input='']
+   * @returns
+   * @memberof Sample
    */
-  public static url(uuid: string, type: Url, config: Configuration): string {
-    return config[type].replace('{domain}', config.domain).replace('{uuid}', uuid);
+  public static async get(uuid: string, input: string = ''): Promise<Sample | false> {
+    const meta = await Sample.meta(uuid);
+    const data = Sample.data(uuid);
+    const local = Sample.local(uuid);
+
+    if (meta) {
+      return new Sample(input, data, meta, local);
+    }
+
+    return false;
   }
 
   /**
-   * Generates sample data.
+   * Generates data object for the given UUID.
    *
    * @private
    * @memberof Sample
    */
-  public static data(domain: string, uuid: string, config: Configuration): SampleData {
+  public static data(uuid: string, options?: Configuration): SampleData {
+    options = { ...config, ...options };
+
     return {
-      domain: domain,
+      domain: options.domain,
       uuid: uuid,
-      url: Sample.url(uuid, Url.Url, config),
-      downloadUrl: Sample.url(uuid, Url.Download, config),
-      listenUrl: Sample.url(uuid, Url.Listen, config),
+      url: Sample.url(uuid, Url.Url, options),
+      downloadUrl: Sample.url(uuid, Url.Download, options),
+      listenUrl: Sample.url(uuid, Url.Listen, options),
     };
   }
 
   /**
-   * Creates a directory if it doesn't exist.
+   * Seek the metadata for the given UUID.
    *
-   * @param directory Directory.
-   */
-  private async createDirectoryIfInexistant(directory: string) {
-    try {
-      if (!fs.existsSync(directory)) {
-        fs.mkdirSync(directory);
-      }
-    } catch (error) {
-      throw new Error(`Could not create '${directory}'.`);
-    }
-  }
-
-  /**
-   * Downloads a sample.
-   *
-   * @param name File name.
-   */
-  public async download(directory: string, name?: string): Promise<SampleData> {
-    if (!this._data) {
-      return new Promise((a, r) => r(`Invalid sample.`));
-    }
-
-    this.createDirectoryIfInexistant((directory = path.resolve(root.path, directory)));
-    const filename = `${name || this._data.uuid}.mp3`;
-    const file = path.resolve(directory, filename);
-    const writer = fs.createWriteStream(file);
-
-    const response = await Axios({
-      url: this._data.downloadUrl,
-      method: 'GET',
-      responseType: 'stream',
-    });
-
-    response.data.pipe(writer);
-
-    this._data.filename = filename;
-    this._data.path = file;
-
-    return new Promise<SampleData>((resolve, reject) => {
-      writer.on('finish', () => {
-        vocabot.info('A sample has been downloaded.', this);
-        resolve(this._data);
-      });
-      writer.on('error', () => {
-        vocabot.error(`A sample could not be downloaded.`, this);
-        reject(this._input);
-      });
-    });
-  }
-
-  /**
-   * Deletes the sample on the disk.
-   *
-   * @returns
+   * @static
+   * @param {string} uuid
+   * @param {Configuration} [options]
+   * @returns {(Promise<SampleMetadata | false>)}
    * @memberof Sample
    */
-  public async delete() {
-    if (!this._data) {
-      return new Promise((a, r) => r(`Invalid sample.`));
-    }
-
-    if (!this._data.path) {
-      return new Promise((a, r) => r(`Sample wasn't downloaded.`));
-    }
-
-    if (!fs.existsSync(this._data.path)) {
-      return new Promise((a, r) => r(`Sample is already deleted.`));
-    }
+  public static async meta(uuid: string, options?: Configuration): Promise<SampleMetadata | false> {
+    options = { ...config, ...options };
 
     try {
-      fs.access(this._data.path, error => {
-        if (!error) {
-            fs.unlinkSync(<string>(<SampleData>this._data).path);
-        } else {
-          vocabot.error(`An access to a sample could not be granted.`, this);
-        }
-    });
-    } catch (error) {
-      vocabot.error(`A sample could not be deleted.`, this);
+      // We need to handle SSH certificates errors
+      const { data } = await Axios.get(Sample.url(uuid, Url.Data, options), {
+        httpsAgent: new https.Agent({ rejectUnauthorized: false })
+      });
+
+      return {
+        found: true,
+        uuid: data.id,
+        authorId: data.user_id,
+        name: data.name,
+        status: data.status,
+        duration: data.duration,
+        description: data.description,
+        createdAt: moment(data.created_at).unix(),
+        updatedAt: moment(data.updated_at).unix(),
+        views: data.views,
+        thumbnail: data.thumbnail_url,
+        waveform: data.waveform_url,
+        liked: data.liked,
+      };
+    } catch (ex) {
+      logger.error('Could not find metadata.', { uuid, error: ex, options });
+      return {
+        found: false,
+        uuid: '',
+        authorId: '',
+        name: '',
+        status: 0,
+        duration: 0,
+        description: '',
+        createdAt: 0,
+        updatedAt: 0,
+        views: 0,
+        thumbnail: '',
+        waveform: '',
+        liked: false,
+      };
     }
+  }
+
+  /**
+   * Generates local storage data.
+   *
+   * @static
+   * @param {string} uuid
+   * @param {Configuration} [options]
+   * @returns {SampleLocalData}
+   * @memberof Sample
+   */
+  public static local(uuid: string, options?: Configuration): SampleLocalData {
+    options = { ...config, ...options };
+    const directory = path.resolve(root.path, env.sample_directory);
+    const filename = `${uuid}.mp3`;
+    const destination = path.resolve(directory, filename);
+
+    return {
+      filename,
+      path: destination,
+    };
+  }
+
+  /**
+   * Downloads the sample.
+   *
+   * @returns {Promise<boolean>}
+   * @memberof Sample
+   */
+  public async download(): Promise<boolean> {
+    return await Storage.download(this);
+  }
+
+  /**
+   * Deletes a sample from the local storage.
+   *
+   * @returns {boolean}
+   * @memberof Sample
+   */
+  public delete(): boolean {
+    return Storage.delete(this);
+  }
+
+  /**
+   * Sample data.
+   *
+   * @readonly
+   * @type {string}
+   * @memberof Sample
+   */
+  public get data(): SampleData {
+    return this._data;
+  }
+
+  /**
+   * Sample metadata.
+   *
+   * @readonly
+   * @type {SampleMetadata}
+   * @memberof Sample
+   */
+  public get metadata(): SampleMetadata {
+    return this._metadata;
+  }
+
+  /**
+   * Sample local data.
+   *
+   * @readonly
+   * @type {SampleLocalData}
+   * @memberof Sample
+   */
+  public get local(): SampleLocalData {
+    return this._local;
   }
 }
