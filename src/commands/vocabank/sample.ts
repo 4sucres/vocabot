@@ -56,3 +56,6 @@ export default class SampleCommand extends Command {
     }
   }
 }
+
+// function handle(message: Message, input: string) {
+// }
