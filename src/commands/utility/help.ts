@@ -1,8 +1,7 @@
 import { Command } from 'discord-akairo';
-import { Message } from 'discord.js';
-import { RichEmbed } from 'discord.js';
-import CommandCategory from '../../app/Category';
-import * as help from '../../util/help';
+import { Message, RichEmbed } from 'discord.js';
+import CommandCategory from '@app/Category';
+import * as help from '@root/util/help';
 import _ from 'lodash';
 import s from 'voca';
 

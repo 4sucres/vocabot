@@ -1,11 +1,10 @@
 import { Command, CommandUtil } from 'discord-akairo';
-import { Message } from 'discord.js';
-import { Sample } from '../../app/Sample/Sample';
-import { sample as config, env } from '../../config/config.json';
-import { Attachment } from 'discord.js';
-import { vocabot } from '../../logger';
-import Category from '../../app/Category';
-import { SampleData } from '../../app/Sample/SampleData';
+import { Message, Attachment } from 'discord.js';
+import { Sample } from '@app/Sample/Sample';
+import { sample as config, env } from '@config';
+import { vocabot as logger } from '@root/logger';
+import { SampleData } from '@app/Sample/SampleData';
+import Category from '@app/Category';
 
 const KEY = '<uuid>';
 
@@ -47,10 +46,10 @@ export default class SampleCommand extends Command {
             });
           })
           .catch(() => {
-            vocabot.error(`A sample could not be downloaded.`, sample);
+            logger.error(`A sample could not be downloaded.`, sample);
           });
       } catch (error) {
-        vocabot.error('An error happened when trying to handle the sample command.', error);
+        logger.error('An error happened when trying to handle the sample command.', error);
       }
     } else {
       return (<CommandUtil>message.util).send(`Parameter \`${KEY}\` should be an URL. Type \`!help sample\` for more informations.`);

@@ -1,6 +1,6 @@
 import { Command, CommandUtil } from 'discord-akairo';
 import { Message } from 'discord.js';
-import Category from '../../app/Category';
+import Category from '@app/Category';
 
 export default class PingCommand extends Command {
   constructor() {

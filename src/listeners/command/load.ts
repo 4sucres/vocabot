@@ -1,5 +1,5 @@
 import { Listener, Command } from 'discord-akairo';
-import { listener as logger } from '../../logger';
+import { listener as logger } from '@logger';
 
 export default class LoadHandler extends Listener
 {

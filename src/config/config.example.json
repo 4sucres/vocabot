@@ -1,10 +1,18 @@
 {
-    "api": {
-        "token": ""
+    "blacklist": {
+        "guilds": [],
+        "users": []
+    },
+    "samples": {
+        "domain": "vocabank.dev",
+        "url": "https://{domain}/samples/{uuid}",
+        "download": "https://{domain}/samples/{uuid}/download",
+        "listen": "https://{domain}/samples/{uuid}/listen",
+        "data": "https://{domain}/samples/{uuid}/data"
     },
     "bot": {
         "prefix": "!",
-        "owner": "",
+        "owner": ["103821289499668480", "160493500494774272"],
         "id": "",
         "secret": "",
         "token": ""
@@ -13,6 +21,7 @@
         "debug": "false",
         "type": "prod",
         "log_level": "info",
-        "database": "./database.sqlite"
+        "database": "./database.sqlite",
+        "sample_directory": "samples"
     }
 }

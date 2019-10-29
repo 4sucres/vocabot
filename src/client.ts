@@ -1,5 +1,5 @@
 import { AkairoClient, CommandHandler } from "discord-akairo";
-import config from './config/config.json';
+import config from '@config';
 import path from 'path';
 
 class Vocabot extends AkairoClient

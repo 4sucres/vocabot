@@ -1,5 +1,5 @@
 import { Listener } from 'discord-akairo';
-import { listener as logger } from '../../logger';
+import { listener as logger } from '@logger';
 
 module.exports = class ReadyListener extends Listener
 {

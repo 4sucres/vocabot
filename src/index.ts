@@ -1,5 +1,6 @@
+import 'module-alias/register';
 import Vocabot from './client.js';
-import config from './config/config.json';
+import config from '@config';
 
 // initialize the bot
 const client = new Vocabot();

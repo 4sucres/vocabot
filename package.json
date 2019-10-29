@@ -13,6 +13,12 @@
     "watch:node": "nodemon dist/index.js",
     "watch": "npm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch:ts\" \"npm run watch:node\""
   },
+  "_moduleAliases": {
+    "@app": "dist/app",
+    "@root": "dist/",
+    "@config": "dist/config/config.json",
+    "@logger": "dist/logger.js"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.4.0",
@@ -27,6 +33,7 @@
     "@types/pino": "^5.8.10",
     "@types/yargs": "^13.0.3",
     "concurrently": "^4.1.2",
+    "module-alias": "^2.2.2",
     "nodemon": "^1.19.2",
     "pino-pretty": "^3.2.1",
     "typescript": "^3.6"
