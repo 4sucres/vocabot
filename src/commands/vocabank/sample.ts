@@ -62,7 +62,7 @@ export default class SampleCommand extends Command {
         message.delete();
       }
 
-      const result = await SampleCommand.handle(message, args[KEY]).catch((reason) => {
+      const result = await SampleCommand.handle(message, args[KEY]).catch(reason => {
         logger.error('An error occured while handling the sample command.', reason);
       });
 
@@ -91,9 +91,9 @@ export default class SampleCommand extends Command {
         let text = `<${result.data.url}>`;
 
         if (result.metadata.name) {
-          text =  `\`${result.metadata.name}\` • ${text}`;
+          text = `\`${result.metadata.name}\` • ${text}`;
         }
-        
+
         if (!args.anonymous) {
           text = `**${message.author.username}** • ${text}`;
         }
@@ -111,13 +111,13 @@ export default class SampleCommand extends Command {
             timestamp: moment.unix(result.metadata.createdAt).toDate(),
             footer: {
               text: `${result.data.uuid} • ${result.metadata.views} view${result.metadata.views > 1 ? 's' : ''}`,
-              icon_url: settings.icon
-            }
+              icon_url: settings.icon,
+            },
           };
           text = '';
           message.channel.send('', { embed });
         }
-  
+
         message.channel.send(text, attachment).then(() => {
           setTimeout(() => result.delete(), settings.fileDeleteTimeout);
         });
@@ -148,7 +148,7 @@ export default class SampleCommand extends Command {
         return SampleCommandError.InputError;
       }
 
-      if (!await sample.download()) {
+      if (!(await sample.download())) {
         return SampleCommandError.DownloadError;
       }
 
