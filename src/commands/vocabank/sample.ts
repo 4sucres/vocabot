@@ -40,6 +40,12 @@ export default class SampleCommand extends Command {
           prefix: ['--silent', '-s'],
           description: `Do not respond with errors`,
         },
+        {
+          id: 'anonymous',
+          match: 'flag',
+          prefix: ['--anonymous', '--anon', '-a'],
+          description: `Do not print the name of the invoker.`,
+        },
       ],
       description: 'Upload and share the given sample.',
     });
@@ -56,7 +62,7 @@ export default class SampleCommand extends Command {
         message.delete();
       }
 
-      const result = await SampleCommand.handle(message, args[KEY]).catch((reason) => {
+      const result = await SampleCommand.handle(message, args[KEY]).catch(reason => {
         logger.error('An error occured while handling the sample command.', reason);
       });
 
@@ -82,7 +88,16 @@ export default class SampleCommand extends Command {
 
       // No error, upload the sample
       try {
-        let text = (result.metadata.name ? `\`${result.metadata.name}\` • ` : '') + `<${result.data.url}>`;
+        let text = `<${result.data.url}>`;
+
+        if (result.metadata.name) {
+          text = `\`${result.metadata.name}\` • ${text}`;
+        }
+
+        if (!args.anonymous) {
+          text = `**${message.author.username}** • ${text}`;
+        }
+
         const attachment: Attachment = new Attachment(result.local.path, `${v.slugify(result.metadata.name) || 'sample'}.mp3` || result.local.filename);
 
         if (args.metadata && result.metadata.found) {
@@ -96,13 +111,17 @@ export default class SampleCommand extends Command {
             timestamp: moment.unix(result.metadata.createdAt).toDate(),
             footer: {
               text: `${result.data.uuid} • ${result.metadata.views} view${result.metadata.views > 1 ? 's' : ''}`,
-              icon_url: settings.icon
+              icon_url: settings.icon,
+            },
+            author: {
+              name: `Shared by ${message.author.username}`,
+              icon_url: message.author.avatarURL
             }
           };
           text = '';
           message.channel.send('', { embed });
         }
-  
+
         message.channel.send(text, attachment).then(() => {
           setTimeout(() => result.delete(), settings.fileDeleteTimeout);
         });
@@ -133,7 +152,7 @@ export default class SampleCommand extends Command {
         return SampleCommandError.InputError;
       }
 
-      if (!await sample.download()) {
+      if (!(await sample.download())) {
         return SampleCommandError.DownloadError;
       }
 
