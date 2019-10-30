@@ -40,6 +40,12 @@ export default class SampleCommand extends Command {
           prefix: ['--silent', '-s'],
           description: `Do not respond with errors`,
         },
+        {
+          id: 'anonymous',
+          match: 'flag',
+          prefix: ['--anonymous', '--anon', '-a'],
+          description: `Do not print the name of the invoker.`,
+        },
       ],
       description: 'Upload and share the given sample.',
     });
@@ -82,7 +88,16 @@ export default class SampleCommand extends Command {
 
       // No error, upload the sample
       try {
-        let text = (result.metadata.name ? `\`${result.metadata.name}\` • ` : '') + `<${result.data.url}>`;
+        let text = `<${result.data.url}>`;
+
+        if (result.metadata.name) {
+          text =  `\`${result.metadata.name}\` • ${text}`;
+        }
+        
+        if (!args.anonymous) {
+          text = `**${message.author.username}** • ${text}`;
+        }
+
         const attachment: Attachment = new Attachment(result.local.path, `${v.slugify(result.metadata.name) || 'sample'}.mp3` || result.local.filename);
 
         if (args.metadata && result.metadata.found) {
