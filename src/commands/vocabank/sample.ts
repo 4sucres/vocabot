@@ -113,6 +113,10 @@ export default class SampleCommand extends Command {
               text: `${result.data.uuid} • ${result.metadata.views} view${result.metadata.views > 1 ? 's' : ''}`,
               icon_url: settings.icon,
             },
+            author: {
+              name: `Shared by ${message.author.username}`,
+              icon_url: message.author.avatarURL
+            }
           };
           text = '';
           message.channel.send('', { embed });
