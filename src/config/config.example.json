@@ -1,4 +1,12 @@
 {
+  "settings": {
+    "messageDeleteTimeout": 5000,
+	"fileDeleteTimeout": 30000,
+	"typingDelay": 300,
+	"typingTimeout": 300,
+	"embedColor": "0x00d0cd",
+	"icon": "https://vocabank.org/img/icons/apple-touch-icon-152x152.png"
+  },
   "blacklist": {
     "guilds": [],
     "users": []
