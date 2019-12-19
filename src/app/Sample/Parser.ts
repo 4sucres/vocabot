@@ -23,11 +23,6 @@ export class Parser {
   static async parseUrl(input: string): Promise<Sample | false> {
     const matches = input.match(Parser.urlRegex);
 
-    if (matches) {
-      console.log(matches)
-      console.log(matches.length)
-    }
-
     if (matches && 5 === matches.length && config.domain === matches[2]) {
       return Sample.get(matches[4], input);
     }
