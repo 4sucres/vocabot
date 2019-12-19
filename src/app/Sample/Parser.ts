@@ -10,7 +10,7 @@ import { vocabot as logger } from '@logger';
  */
 export class Parser {
 
-  public static urlRegex: RegExp = /^(https:\/\/)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})(?:\/samples\/)([a-zA-Z0-9]{1,})$/;
+  public static urlRegex: RegExp = /^(https:\/\/)?([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5})(?:\/samples\/)([a-zA-Z0-9]{6})$/;
   // https://vocabank.dev/samples/519d0a1c-a16e-4dd3-8c50-4f251e4596e3/data
 
   /**
