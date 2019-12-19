@@ -13,10 +13,10 @@
   },
   "samples": {
     "domain": "vocabank.dev",
-    "url": "https://{domain}/samples/{uuid}",
-    "download": "https://{domain}/samples/{uuid}/download",
-    "listen": "https://{domain}/samples/{uuid}/listen",
-    "data": "https://{domain}/samples/{uuid}/data"
+    "url": "https://{domain}/samples/{hashId}",
+    "download": "https://{domain}/samples/{hashId}/download",
+    "listen": "https://{domain}/samples/{hashId}/listen",
+    "data": "https://{domain}/samples/{hashId}/data"
   },
   "bot": {
     "prefix": "!",
