@@ -148,7 +148,6 @@ export default class SampleCommand extends Command {
       const timeout = setTimeout(() => message.channel.startTyping(), settings.typingDelay);
       const sample = await Parser.parse(url);
 
-      console.log(sample);
       clearTimeout(timeout);
 
       if (!sample) {
