@@ -24,7 +24,7 @@ module.exports = class MessageListener extends Listener {
     if (sample) {
       logger.info('Found a message containing a Vocabank URL.', sample);
       new SampleCommand().exec(message, {
-        [KEY]: sample.data.hashId,
+        [KEY]: sample.data.url,
         keep: false,
         silent: true,
         metadata: false,
