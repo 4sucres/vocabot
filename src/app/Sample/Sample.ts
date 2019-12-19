@@ -28,25 +28,25 @@ export class Sample {
   }
 
   /**
-   * Gets an URL with the given UUID.
+   * Gets an URL with the given hashid.
    */
-  public static url(uuid: string, type: Url, options?: Configuration): string {
-    return config[type].replace('{domain}', { ...config, ...options }.domain).replace('{uuid}', uuid);
+  public static url(hashId: string, type: Url, options?: Configuration): string {
+    return config[type].replace('{domain}', { ...config, ...options }.domain).replace('{hashId}', hashId);
   }
 
   /**
-   * Generates a sample from an UUID.
+   * Generates a sample from an hashid.
    *
    * @static
-   * @param {string} uuid
+   * @param {string} hashId
    * @param {string} [input='']
    * @returns
    * @memberof Sample
    */
-  public static async get(uuid: string, input: string = ''): Promise<Sample | false> {
-    const meta = await Sample.meta(uuid);
-    const data = Sample.data(uuid);
-    const local = Sample.local(uuid);
+  public static async get(hashId: string, input: string = ''): Promise<Sample | false> {
+    const meta = await Sample.meta(hashId);
+    const data = Sample.data(hashId);
+    const local = Sample.local(hashId);
 
     if (meta) {
       return new Sample(input, data, meta, local);
@@ -56,44 +56,44 @@ export class Sample {
   }
 
   /**
-   * Generates data object for the given UUID.
+   * Generates data object for the given hashid.
    *
    * @private
    * @memberof Sample
    */
-  public static data(uuid: string, options?: Configuration): SampleData {
+  public static data(hashId: string, options?: Configuration): SampleData {
     options = { ...config, ...options };
 
     return {
       domain: options.domain,
-      uuid: uuid,
-      url: Sample.url(uuid, Url.Url, options),
-      downloadUrl: Sample.url(uuid, Url.Download, options),
-      listenUrl: Sample.url(uuid, Url.Listen, options),
+      hashId: hashId,
+      url: Sample.url(hashId, Url.Url, options),
+      downloadUrl: Sample.url(hashId, Url.Download, options),
+      listenUrl: Sample.url(hashId, Url.Listen, options),
     };
   }
 
   /**
-   * Seek the metadata for the given UUID.
+   * Seek the metadata for the given hashid.
    *
    * @static
-   * @param {string} uuid
+   * @param {string} hashId
    * @param {Configuration} [options]
    * @returns {(Promise<SampleMetadata | false>)}
    * @memberof Sample
    */
-  public static async meta(uuid: string, options?: Configuration): Promise<SampleMetadata | false> {
+  public static async meta(hashId: string, options?: Configuration): Promise<SampleMetadata | false> {
     options = { ...config, ...options };
 
     try {
       // We need to handle SSH certificates errors
-      const { data } = await Axios.get(Sample.url(uuid, Url.Data, options), {
+      const { data } = await Axios.get(Sample.url(hashId, Url.Data, options), {
         httpsAgent: new https.Agent({ rejectUnauthorized: false })
       });
 
       return {
         found: true,
-        uuid: data.id,
+        hashId: data.id,
         authorId: data.user_id,
         name: data.name,
         status: data.status,
@@ -107,10 +107,11 @@ export class Sample {
         liked: data.liked,
       };
     } catch (ex) {
-      logger.error('Could not find metadata.', { uuid, error: ex, options });
+      logger.error('Could not find metadata.', { hashId, error: ex, options });
+
       return {
         found: false,
-        uuid: '',
+        hashId: '',
         authorId: '',
         name: '',
         status: 0,
@@ -130,15 +131,15 @@ export class Sample {
    * Generates local storage data.
    *
    * @static
-   * @param {string} uuid
+   * @param {string} hashId
    * @param {Configuration} [options]
    * @returns {SampleLocalData}
    * @memberof Sample
    */
-  public static local(uuid: string, options?: Configuration): SampleLocalData {
+  public static local(hashId: string, options?: Configuration): SampleLocalData {
     options = { ...config, ...options };
     const directory = path.resolve(root.path, env.sample_directory);
-    const filename = `${uuid}.mp3`;
+    const filename = `${hashId}.mp3`;
     const destination = path.resolve(directory, filename);
 
     return {

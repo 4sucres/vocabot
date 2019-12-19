@@ -7,8 +7,9 @@ import { Parser } from '@app/Sample/Parser';
 import Category from '@app/Category';
 import v from 'voca';
 import moment from 'moment';
+import { Url } from '@app/Sample/Url';
 
-export const KEY = '<uuid>';
+export const KEY = '<hashId>';
 
 export default class SampleCommand extends Command {
   constructor() {
@@ -20,7 +21,7 @@ export default class SampleCommand extends Command {
         {
           id: KEY,
           type: 'string',
-          description: 'An UUID or an URL.',
+          description: 'An URL.',
         },
         {
           id: 'metadata',
@@ -73,7 +74,7 @@ export default class SampleCommand extends Command {
 
           switch (result) {
             case SampleCommandError.InputError:
-              error = 'The file you entered is not a valid sample. You can try with URLs or UUIDs.';
+              error = 'The file you entered is not a valid sample. You can try with URLs.';
               break;
           }
 
@@ -110,7 +111,7 @@ export default class SampleCommand extends Command {
             description: result.metadata.description || 'No description provided.',
             timestamp: moment.unix(result.metadata.createdAt).toDate(),
             footer: {
-              text: `${result.data.uuid} • ${result.metadata.views} view${result.metadata.views > 1 ? 's' : ''}`,
+              text: `${result.data.hashId} • ${result.metadata.views} view${result.metadata.views > 1 ? 's' : ''}`,
               icon_url: settings.icon,
             },
             author: {
@@ -138,14 +139,14 @@ export default class SampleCommand extends Command {
    *
    * @static
    * @param {Message} message
-   * @param {string} uuid
+   * @param {string} hashId
    * @returns {(Promise<Sample | SampleCommandError>)}
    * @memberof SampleCommand
    */
-  static async handle(message: Message, uuid: string): Promise<Sample | SampleCommandError> {
+  static async handle(message: Message, hashId: string): Promise<Sample | SampleCommandError> {
     try {
       const timeout = setTimeout(() => message.channel.startTyping(), settings.typingDelay);
-      const sample = await Parser.parse(uuid);
+      const sample = await Parser.parse(Sample.url(hashId, Url.Url));
       clearTimeout(timeout);
 
       if (!sample) {
@@ -158,7 +159,7 @@ export default class SampleCommand extends Command {
 
       return sample;
     } catch (ex) {
-      logger.error('An unexpected error occured while handling the sample command.', { uuid, error: ex });
+      logger.error('An unexpected error occured while handling the sample command.', { hashId, error: ex });
       return SampleCommandError.UnexpectedError;
     } finally {
       setTimeout(() => message.channel.stopTyping(), settings.typingDelay + settings.typingTimeout);

@@ -9,12 +9,12 @@ export interface SampleData {
   domain: string;
 
   /**
-   * File UUID.
+   * File hash ID.
    *
    * @type {string}
    * @memberof SampleData
    */
-  uuid: string;
+  hashId: string;
 
   /**
    * Vocabank URL.

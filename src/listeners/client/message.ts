@@ -22,9 +22,9 @@ module.exports = class MessageListener extends Listener {
     const sample = await Parser.parse(v.trim(message.content));
 
     if (sample) {
-      logger.info('Found a message containing a Vocabank URL or UUID.', sample);
+      logger.info('Found a message containing a Vocabank URL.', sample);
       new SampleCommand().exec(message, {
-        [KEY]: sample.data.uuid,
+        [KEY]: sample.data.hashId,
         keep: false,
         silent: true,
         metadata: false,

@@ -11,15 +11,15 @@ export interface SampleMetadata {
   found: boolean;
 
   /**
-   * UUID of the sample.
+   * HashID of the sample.
    *
    * @type {string}
    * @memberof SampleMetadata
    */
-  uuid: string;
+  hashId: string;
 
   /**
-   * UUID of the author.
+   * HashID of the author.
    *
    * @type {string}
    * @memberof SampleMetadata
