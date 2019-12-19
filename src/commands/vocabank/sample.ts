@@ -9,7 +9,7 @@ import v from 'voca';
 import moment from 'moment';
 import { Url } from '@app/Sample/Url';
 
-export const KEY = '<hashId>';
+export const KEY = '<url>';
 
 export default class SampleCommand extends Command {
   constructor() {
@@ -39,7 +39,7 @@ export default class SampleCommand extends Command {
           id: 'silent',
           match: 'flag',
           prefix: ['--silent', '-s'],
-          description: `Do not respond with errors`,
+          description: `Do not respond with errors.`,
         },
         {
           id: 'anonymous',
@@ -74,7 +74,7 @@ export default class SampleCommand extends Command {
 
           switch (result) {
             case SampleCommandError.InputError:
-              error = 'The file you entered is not a valid sample. You can try with URLs.';
+              error = 'The file you entered is not a valid sample.';
               break;
           }
 
@@ -139,14 +139,16 @@ export default class SampleCommand extends Command {
    *
    * @static
    * @param {Message} message
-   * @param {string} hashId
+   * @param {string} url
    * @returns {(Promise<Sample | SampleCommandError>)}
    * @memberof SampleCommand
    */
-  static async handle(message: Message, hashId: string): Promise<Sample | SampleCommandError> {
+  static async handle(message: Message, url: string): Promise<Sample | SampleCommandError> {
     try {
       const timeout = setTimeout(() => message.channel.startTyping(), settings.typingDelay);
-      const sample = await Parser.parse(Sample.url(hashId, Url.Url));
+      const sample = await Parser.parse(url);
+
+      console.log(sample);
       clearTimeout(timeout);
 
       if (!sample) {
@@ -159,7 +161,7 @@ export default class SampleCommand extends Command {
 
       return sample;
     } catch (ex) {
-      logger.error('An unexpected error occured while handling the sample command.', { hashId, error: ex });
+      logger.error('An unexpected error occured while handling the sample command.', { url, error: ex });
       return SampleCommandError.UnexpectedError;
     } finally {
       setTimeout(() => message.channel.stopTyping(), settings.typingDelay + settings.typingTimeout);
