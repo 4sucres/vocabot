@@ -7,11 +7,12 @@
     "type-check:watch": "npm run type-check -- --watch",
     "clear": "rm -rf dist && rm -rf lib",
     "build": "npm run clear && npm run build:ts && npm run build:js",
-    "build:ts": "tsc --emitDeclarationOnly",
+    "build:ts": "tsc",
     "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
     "watch:ts": "tsc -w",
     "watch:node": "nodemon dist/index.js",
-    "watch": "npm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch:ts\" \"npm run watch:node\""
+    "watch": "npm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch:ts\" \"npm run watch:node\"",
+    "start": "npm run build && node dist/index.js"
   },
   "_moduleAliases": {
     "@app": "dist/app",
